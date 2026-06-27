@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Password Guesser</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    overflow:hidden;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(-45deg,#141E30,#243B55,#2b5876,#4e4376);
+    background-size:400% 400%;
+    animation:bgMove 12s ease infinite;
+}
+
+@keyframes bgMove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+.card{
+    width:520px;
+    max-width:90%;
+    padding:45px;
+    border-radius:25px;
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,.2);
+    text-align:center;
+    color:white;
+    box-shadow:0 25px 60px rgba(0,0,0,.35);
+}
+
+h1{
+    font-size:42px;
+    margin-bottom:15px;
+}
+
+p{
+    opacity:.75;
+    margin-bottom:35px;
+}
+
+input{
+    width:100%;
+    padding:18px;
+    border:none;
+    outline:none;
+    border-radius:15px;
+    background:rgba(255,255,255,.12);
+    color:white;
+    font-size:22px;
+    transition:.25s;
+}
+
+input::placeholder{
+    color:#ddd;
+}
+
+input:focus{
+    transform:scale(1.03);
+    background:rgba(255,255,255,.18);
+}
+
+button{
+    margin-top:22px;
+    width:100%;
+    padding:18px;
+    border:none;
+    border-radius:15px;
+    background:white;
+    color:#222;
+    font-size:20px;
+    cursor:pointer;
+    transition:.25s;
+}
+
+button:hover{
+    transform:translateY(-3px);
+}
+
+#message{
+    margin-top:25px;
+    font-size:22px;
+    height:35px;
+}
+
+.correct{
+    color:#6CFF81;
+}
+
+.wrong{
+    color:#ff7070;
+}
+
+.shake{
+    animation:shake .4s;
+}
+
+@keyframes shake{
+0%{transform:translateX(0);}
+20%{transform:translateX(-12px);}
+40%{transform:translateX(12px);}
+60%{transform:translateX(-10px);}
+80%{transform:translateX(10px);}
+100%{transform:translateX(0);}
+}
+
+canvas{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="card">
+
+<h1>🔒 Guess The Password</h1>
+
+<p>Type the secret password below.</p>
+
+<input id="guess" placeholder="Enter Password">
+
+<button onclick="check()">Guess</button>
+
+<div id="message"></div>
+
+</div>
+
+<script>
+
+const PASSWORD="OpenSesame";
+
+const input=document.getElementById("guess");
+const message=document.getElementById("message");
+const card=document.querySelector(".card");
+
+input.addEventListener("keydown",e=>{
+if(e.key==="Enter")check();
+});
+
+function check(){
+
+if(input.value===PASSWORD){
+
+message.innerHTML="🎉 Correct Password!";
+message.className="correct";
+
+launchConfetti();
+
+}else{
+
+message.innerHTML="❌ Wrong Password";
+message.className="wrong";
+
+card.classList.remove("shake");
+
+void card.offsetWidth;
+
+card.classList.add("shake");
+
+}
+
+}
+
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+}
+resize();
+
+window.addEventListener("resize",resize);
+
+let confetti=[];
+
+function random(min,max){
+return Math.random()*(max-min)+min;
+}
+
+function launchConfetti(){
+
+confetti=[];
+
+for(let i=0;i<350;i++){
+
+confetti.push({
+
+x:random(0,canvas.width),
+
+y:random(-canvas.height,0),
+
+size:random(5,12),
+
+speed:random(2,7),
+
+angle:random(0,360),
+
+spin:random(-8,8),
+
+color:`hsl(${Math.random()*360},100%,60%)`
+
+});
+
+}
+
+animate();
+
+}
+
+function animate(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+confetti.forEach(c=>{
+
+ctx.save();
+
+ctx.translate(c.x,c.y);
+
+ctx.rotate(c.angle*Math.PI/180);
+
+ctx.fillStyle=c.color;
+
+ctx.fillRect(-c.size/2,-c.size/2,c.size,c.size);
+
+ctx.restore();
+
+c.y+=c.speed;
+c.angle+=c.spin;
+
+});
+
+confetti=confetti.filter(c=>c.y<canvas.height+20);
+
+if(confetti.length>0){
+
+requestAnimationFrame(animate);
+
+}else{
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
